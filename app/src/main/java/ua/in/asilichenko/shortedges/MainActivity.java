@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
   private void setImageViewImg(String selectedNumber) {
     switch (selectedNumber) {
       case "1": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img1);
         break;
       }
 
@@ -125,42 +125,42 @@ public class MainActivity extends AppCompatActivity {
       }
 
       case "3": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img3);
         break;
       }
 
       case "4": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img4);
         break;
       }
 
       case "5": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img5);
         break;
       }
 
       case "6": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img6);
         break;
       }
 
       case "7": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img7);
         break;
       }
 
       case "8": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img8);
         break;
       }
 
       case "9": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img9);
         break;
       }
 
       case "10": {
-        imageView.setImageResource(R.drawable.img2);
+        imageView.setImageResource(R.drawable.img10);
         break;
       }
 
