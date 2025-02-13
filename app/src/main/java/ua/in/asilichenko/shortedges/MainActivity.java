@@ -64,10 +64,10 @@ public class MainActivity extends AppCompatActivity {
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     numberSpinner.setAdapter(adapter);
     // Restore last selected number
-    int lastSelected = sharedPreferences.getInt("KEY_LAST_SELECTED", 1); // Default to index 0
-    numberSpinner.setSelection(lastSelected);
+    int position = sharedPreferences.getInt("KEY_LAST_SELECTED", 0); // Default to index 0
+    numberSpinner.setSelection(position);
 
-    setImageViewImg(""+lastSelected);
+    setImageViewImg(""+(position+1));
 
 
 
@@ -75,10 +75,9 @@ public class MainActivity extends AppCompatActivity {
     numberSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String selectedNumber = parent.getItemAtPosition(position).toString();
-        Log.d("SpinnerCheck", "Selected number: " + selectedNumber);
+        Log.d("SpinnerCheck", "Selected: " + (position + 1));
         sharedPreferences.edit().putInt("KEY_LAST_SELECTED", position).apply();
-        setImageViewImg(selectedNumber);
+        setImageViewImg("" + (position + 1));
       }
 
       @Override
