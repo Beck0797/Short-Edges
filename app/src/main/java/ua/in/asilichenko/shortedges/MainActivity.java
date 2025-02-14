@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     imageView = findViewById(R.id.img_background);
 
     // Create an array of numbers 1-10
-    String[] numbers = new String[10];
-    for (int i = 0; i < 10; i++) {
+    String[] numbers = new String[20];
+    for (int i = 0; i < 20; i++) {
       numbers[i] = String.valueOf(i + 1);
     }
 
@@ -160,6 +160,56 @@ public class MainActivity extends AppCompatActivity {
 
       case "10": {
         imageView.setImageResource(R.drawable.img10);
+        break;
+      }
+
+      case "11": {
+        imageView.setImageResource(R.drawable.img11);
+        break;
+      }
+
+      case "12": {
+        imageView.setImageResource(R.drawable.img12);
+        break;
+      }
+
+      case "13": {
+        imageView.setImageResource(R.drawable.img13);
+        break;
+      }
+
+      case "14": {
+        imageView.setImageResource(R.drawable.img14);
+        break;
+      }
+
+      case "15": {
+        imageView.setImageResource(R.drawable.img15);
+        break;
+      }
+
+      case "16": {
+        imageView.setImageResource(R.drawable.img16);
+        break;
+      }
+
+      case "17": {
+        imageView.setImageResource(R.drawable.img17);
+        break;
+      }
+
+      case "18": {
+        imageView.setImageResource(R.drawable.img18);
+        break;
+      }
+
+      case "19": {
+        imageView.setImageResource(R.drawable.img19);
+        break;
+      }
+
+      case "20": {
+        imageView.setImageResource(R.drawable.img20);
         break;
       }
 
