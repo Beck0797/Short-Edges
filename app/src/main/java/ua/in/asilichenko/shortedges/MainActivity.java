@@ -3,6 +3,7 @@ package ua.in.asilichenko.shortedges;
 import static java.lang.Math.max;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.os.Handler;
@@ -41,11 +42,35 @@ public class MainActivity extends AppCompatActivity {
 
     sharedPreferences = getSharedPreferences("PREFS_NAME", MODE_PRIVATE);
 
+    getScreenSize();
     setDecorFitsSystemWindows();
     initUI();
 
 
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.top_btn), this::onApplyWindowInsets);
+  }
+
+  private void getScreenSize() {
+    DisplayMetrics displayMetrics = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+    int height = displayMetrics.heightPixels;
+    int width = displayMetrics.widthPixels;
+    int height2 = displayMetrics.heightPixels + getNavigationBarHeight();
+
+    Log.e("ScreenSize", "height: " + height + " width: " + width);
+    Log.e("ScreenSize", "height2: " + height2 + " width: " + width);
+  }
+
+  private int getNavigationBarHeight() {
+    DisplayMetrics metrics = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(metrics);
+    int usableHeight = metrics.heightPixels;
+    getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+    int realHeight = metrics.heightPixels;
+    if (realHeight > usableHeight)
+      return realHeight - usableHeight;
+    else
+      return 0;
   }
 
   private void initUI() {
@@ -54,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
     imageView = findViewById(R.id.img_background);
 
     // Create an array of numbers 1-10
-    String[] numbers = new String[40];
-    for (int i = 0; i < 40; i++) {
+    String[] numbers = new String[20];
+    for (int i = 0; i < 20; i++) {
       numbers[i] = String.valueOf(i + 1);
     }
 
@@ -210,106 +235,6 @@ public class MainActivity extends AppCompatActivity {
 
       case "20": {
         imageView.setImageResource(R.drawable.img20);
-        break;
-      }
-
-      case "21": {
-        imageView.setImageResource(R.drawable.img21);
-        break;
-      }
-
-      case "22": {
-        imageView.setImageResource(R.drawable.img22);
-        break;
-      }
-
-      case "23": {
-        imageView.setImageResource(R.drawable.img23);
-        break;
-      }
-
-      case "24": {
-        imageView.setImageResource(R.drawable.img24);
-        break;
-      }
-
-      case "25": {
-        imageView.setImageResource(R.drawable.img25);
-        break;
-      }
-
-      case "26": {
-        imageView.setImageResource(R.drawable.img26);
-        break;
-      }
-
-      case "27": {
-        imageView.setImageResource(R.drawable.img27);
-        break;
-      }
-
-      case "28": {
-        imageView.setImageResource(R.drawable.img28);
-        break;
-      }
-
-      case "29": {
-        imageView.setImageResource(R.drawable.img29);
-        break;
-      }
-
-      case "30": {
-        imageView.setImageResource(R.drawable.img30);
-        break;
-      }
-
-      case "31": {
-        imageView.setImageResource(R.drawable.img31);
-        break;
-      }
-
-      case "32": {
-        imageView.setImageResource(R.drawable.img32);
-        break;
-      }
-
-      case "33": {
-        imageView.setImageResource(R.drawable.img33);
-        break;
-      }
-
-      case "34": {
-        imageView.setImageResource(R.drawable.img34);
-        break;
-      }
-
-      case "35": {
-        imageView.setImageResource(R.drawable.img35);
-        break;
-      }
-
-      case "36": {
-        imageView.setImageResource(R.drawable.img36);
-        break;
-      }
-
-      case "37": {
-        imageView.setImageResource(R.drawable.img37);
-        break;
-      }
-
-      case "38": {
-        imageView.setImageResource(R.drawable.img38);
-        break;
-      }
-
-      case "39": {
-        imageView.setImageResource(R.drawable.img39);
-        break;
-      }
-
-      case "40": {
-        imageView.setImageResource(R.drawable.img40);
         break;
       }
     }
