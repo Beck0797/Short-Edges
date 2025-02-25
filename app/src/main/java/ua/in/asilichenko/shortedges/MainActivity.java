@@ -2,32 +2,18 @@ package ua.in.asilichenko.shortedges;
 
 import static java.lang.Math.max;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,13 +23,13 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import ua.in.asilichenko.shortedges.data.PreferenceManager;
 import ua.in.asilichenko.shortedges.viewmodel.MainViewModel;
 
 @AndroidEntryPoint
@@ -52,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private MainViewModel viewModel;
     private String ipAddress;
+    @Inject
+    PreferenceManager preferenceManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,15 +48,17 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.img_background);
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         ipAddress = getDeviceIpAddress(this);
+        preferenceManager.init(this);
 
         getScreenSize();
         setDecorFitsSystemWindows();
+        viewModel.startUdpClient();
 
-        if (doImageExist(this)) {
+        if (doImageExist()) {
             Log.e("ImageTest", "Image exits");
 
             //set image
-            setImageIfResourceExists(this);
+            setImageIfResourceExists();
 
             //send ready command
             viewModel.sendReadyCommand(ipAddress);
@@ -76,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e("ImageTest", "Image  does not exits");
 
-            //get image from server
             viewModel.fetchImage(ipAddress);
 
             viewModel.getImageFetchResult().observe(this, success -> {
                 if (success) {
-                    setImageIfResourceExists(this);
+                    runOnUiThread(this::setImageIfResourceExists);
+
                     viewModel.sendReadyCommand(ipAddress);
                     Log.e("ImageTest", "Image downloaded successfully!");
 
@@ -91,30 +81,85 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // observe udp
+        viewModel.getReceivedMessage().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String message) {
+
+                Log.e("ImageTest", "UDP onChanged: " + message);
+
+
+                String command = message.split("_")[0];
+
+                Log.e("ImageTest", "UDP command:" + command);
+
+                switch (command) {
+                    case "DEL": {
+                        Log.e("ImageTest", "case del: ");
+
+                        runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
+                        deleteImage();
+                        break;
+                    }
+
+                    case "DLI": {
+                        Log.e("ImageTest", "case dli: ");
+                        runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
+                        deleteImage();
+
+                        viewModel.fetchImage(ipAddress);
+                        viewModel.getImageFetchResult().observe(MainActivity.this, success -> {
+                            if (success) {
+                                runOnUiThread(() -> setImageIfResourceExists());
+
+                                Log.e("ImageTest", "Image downloaded successfully!");
+
+                            } else {
+                                Log.e("ImageTest", "Failed to download image!");
+                            }
+                        });
+
+
+                        break;
+                    }
+
+                    case "SM": {
+                        Log.e("ImageTest", "case sm: " + message);
+
+                        message.trim();
+                        if (message.endsWith("00")) {
+                            // BLACK
+                            Log.e("ImageTest", "UDP 00: " + message);
+                            imageView.setImageResource(R.drawable.black);
+
+                        } else if (message.endsWith("01")) {
+                            // Image
+                            Log.e("ImageTest", "UDP 01: " + message);
+                            setImageIfResourceExists();
+                        } else {
+                            Log.e("ImageTest", "Unexpected message: " + message);
+                        }
+
+
+                        break;
+                    }
+                }
+
+            }
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.top_btn), this::onApplyWindowInsets);
     }
 
-    public boolean doImageExist(Context context) {
-        Uri downloadsUri = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            downloadsUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
-        }
-
-        String[] projection = {MediaStore.MediaColumns.DISPLAY_NAME};
-        String selection = MediaStore.MediaColumns.DISPLAY_NAME + " = ?";
-        String[] selectionArgs = {"img.png"};
-
-        Cursor cursor = context.getContentResolver().query(downloadsUri, projection, selection, selectionArgs, null);
-
-        boolean exists = (cursor != null && cursor.getCount() > 0);
-
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        return exists;
+    public boolean doImageExist() {
+        Bitmap bitmap = viewModel.getUserImage();
+        return bitmap != null;
     }
+
+    public void deleteImage() {
+        viewModel.delUserImage();
+    }
+
 
     private void getScreenSize() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -140,40 +185,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void setImageIfResourceExists(Context context) {
-        // Path to the image in Downloads (Replace with actual filename if needed)
-        Uri imageUri = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            imageUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
-        }
-
-        // Query the URI for the image
-        String[] projection = {MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME};
-        String selection = MediaStore.MediaColumns.DISPLAY_NAME + " = ?";
-        String[] selectionArgs = new String[]{"imp.png"}; // Your image name
-
-        ContentResolver contentResolver = context.getContentResolver();
-        Cursor cursor = contentResolver.query(imageUri, projection, selection, selectionArgs, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
-            long id = cursor.getLong(idColumn);
-            Uri contentUri = Uri.withAppendedPath(imageUri, String.valueOf(id));
-
-            // Get the InputStream for the image
-            try (InputStream inputStream = contentResolver.openInputStream(contentUri)) {
-                if (inputStream != null) {
-                    // Decode the InputStream to a Bitmap
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-                    // Set the Bitmap to ImageView
-                    imageView.setImageBitmap(bitmap);
-                    Log.e("ImageTest", "setImageIfResourceExists yes image");
-
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public void setImageIfResourceExists() {
+        Bitmap bitmap = viewModel.getUserImage();
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
         } else {
             imageView.setImageResource(R.drawable.black);
 

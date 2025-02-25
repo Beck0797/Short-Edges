@@ -10,6 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ua.`in`.asilichenko.shortedges.data.FileServerApi
+import ua.`in`.asilichenko.shortedges.data.PreferenceManager
+import ua.`in`.asilichenko.shortedges.data.UdpClient
+import ua.`in`.asilichenko.shortedges.data.UdpJavaClient
 import javax.inject.Singleton
 
 @Module
@@ -23,6 +26,24 @@ object AppModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(FileServerApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUdpClient(): UdpClient {
+        return UdpClient()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUdpJavaClient(): UdpJavaClient {
+        return UdpJavaClient()
+    }
+
+    @Singleton
+    @Provides
+    fun getPreferenceManager() : PreferenceManager {
+        return PreferenceManager
+    }
 
     @Singleton
     @Provides
