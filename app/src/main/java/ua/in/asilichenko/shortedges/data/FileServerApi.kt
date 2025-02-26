@@ -11,7 +11,7 @@ import ua.`in`.asilichenko.shortedges.data.model.ApiErrorResponse
 interface FileServerApi {
 
     companion object{
-        const val BASE_URL = "http://192.168.0.29:15000"
+        const val BASE_URL = "http://192.168.0.10:15000"
         const val CLIENT_ID = ""
     }
 

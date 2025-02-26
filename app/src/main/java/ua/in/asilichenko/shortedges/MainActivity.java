@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
                     case "ST": {
                         if (message.endsWith(ipLastTwoDigits)) {
-                            viewModel.sendStateMessage(ipAddress);
+                            viewModel.sendReadyCommand(ipAddress);
                         }
                         break;
                     }
