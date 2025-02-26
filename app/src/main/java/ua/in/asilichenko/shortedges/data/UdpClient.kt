@@ -13,7 +13,7 @@ class UdpClient @Inject constructor() {
 
     private var receiveSocket: DatagramSocket? = null
     private var sendSocket: DatagramSocket? = null
-    private val serverAddress: InetAddress = InetAddress.getByName("192.168.0.28") // Server IP
+    private val serverAddress: InetAddress = InetAddress.getByName("192.168.0.29") // Server IP
     private val receivePort: Int = 15002 // Listening port
     private val sendPort: Int = 15001 // Destination port
 
@@ -27,7 +27,6 @@ class UdpClient @Inject constructor() {
                 receiveSocket =
                     DatagramSocket(receivePort) // Bind socket to port 15002 for receiving
                 sendSocket = DatagramSocket() // Create sending socket
-                sendMessage("Hello UDP Server") // Initial message
 
                 val receiveData = ByteArray(1024)
                 while (true) {

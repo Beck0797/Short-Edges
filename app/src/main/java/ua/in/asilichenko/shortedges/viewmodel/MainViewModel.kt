@@ -33,12 +33,22 @@ class MainViewModel @Inject constructor(
 
     fun sendReadyCommand(ipAddress: String) {
         viewModelScope.launch {
-            Log.e("ImageTest", "vm -> sendReadyCommand(): $ipAddress")
             val index = extractLastDigits(ipAddress)
             if (index < 10) {
                 sendUdpMessage("RM_0$index")
             } else {
                 sendUdpMessage("RM_10")
+            }
+        }
+    }
+
+    fun sendStateMessage(ipAddress: String) {
+        viewModelScope.launch {
+            val index = extractLastDigits(ipAddress)
+            if (index < 10) {
+                sendUdpMessage("ST_0$index")
+            } else {
+                sendUdpMessage("ST_10")
             }
         }
     }

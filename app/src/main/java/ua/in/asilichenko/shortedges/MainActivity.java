@@ -2,6 +2,7 @@ package ua.in.asilichenko.shortedges;
 
 import static java.lang.Math.max;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.wifi.WifiInfo;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import ua.in.asilichenko.shortedges.data.FileServerApi;
 import ua.in.asilichenko.shortedges.data.PreferenceManager;
 import ua.in.asilichenko.shortedges.viewmodel.MainViewModel;
 
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private MainViewModel viewModel;
     private String ipAddress;
+    private String ipLastTwoDigits;
     @Inject
     PreferenceManager preferenceManager;
 
@@ -48,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.img_background);
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         ipAddress = getDeviceIpAddress(this);
+        ipLastTwoDigits = getIpLastTwoGigits();
         preferenceManager.init(this);
 
         getScreenSize();
@@ -55,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         viewModel.startUdpClient();
 
         if (doImageExist()) {
-            Log.e("ImageTest", "Image exits");
 
             //set image
             setImageIfResourceExists();
@@ -64,8 +68,7 @@ public class MainActivity extends AppCompatActivity {
             viewModel.sendReadyCommand(ipAddress);
 
         } else {
-            Log.e("ImageTest", "Image  does not exits");
-
+            // no image in the memory
             viewModel.fetchImage(ipAddress);
 
             viewModel.getImageFetchResult().observe(this, success -> {
@@ -76,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("ImageTest", "Image downloaded successfully!");
 
                 } else {
-                    Log.e("ImageTest", "Failed to download image!");
+                    Toast.makeText(this, "Failed to download image.\n" +
+                            " Check Server: " + FileServerApi.BASE_URL, Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -86,61 +90,50 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(String message) {
 
-                Log.e("ImageTest", "UDP onChanged: " + message);
-
-
                 String command = message.split("_")[0];
-
-                Log.e("ImageTest", "UDP command:" + command);
+                message.trim();
 
                 switch (command) {
                     case "DEL": {
-                        Log.e("ImageTest", "case del: ");
-
-                        runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
-                        deleteImage();
+                        if (message.endsWith(ipLastTwoDigits)) {
+                            runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
+                            deleteImage();
+                        }
                         break;
                     }
 
                     case "DLI": {
-                        Log.e("ImageTest", "case dli: ");
-                        runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
-                        deleteImage();
+                        if (message.endsWith(ipLastTwoDigits)) {
+                            runOnUiThread(() -> imageView.setImageResource(R.drawable.black));
+                            deleteImage();
 
-                        viewModel.fetchImage(ipAddress);
-                        viewModel.getImageFetchResult().observe(MainActivity.this, success -> {
-                            if (success) {
-                                runOnUiThread(() -> setImageIfResourceExists());
+                            viewModel.fetchImage(ipAddress);
+                            viewModel.getImageFetchResult().observe(MainActivity.this, success -> {
+                                if (success) {
+                                    runOnUiThread(() -> setImageIfResourceExists());
+                                } else {
+                                    Log.e("ImageTest", "Failed to download image!");
+                                }
+                            });
+                        }
+                        break;
+                    }
 
-                                Log.e("ImageTest", "Image downloaded successfully!");
-
-                            } else {
-                                Log.e("ImageTest", "Failed to download image!");
-                            }
-                        });
-
-
+                    case "ST": {
+                        if (message.endsWith(ipLastTwoDigits)) {
+                            viewModel.sendStateMessage(ipAddress);
+                        }
                         break;
                     }
 
                     case "SM": {
-                        Log.e("ImageTest", "case sm: " + message);
-
-                        message.trim();
                         if (message.endsWith("00")) {
-                            // BLACK
-                            Log.e("ImageTest", "UDP 00: " + message);
-                            imageView.setImageResource(R.drawable.black);
-
+                            fadeOutAndChangeImage(true);
                         } else if (message.endsWith("01")) {
-                            // Image
-                            Log.e("ImageTest", "UDP 01: " + message);
-                            setImageIfResourceExists();
+                            fadeOutAndChangeImage(false);
                         } else {
                             Log.e("ImageTest", "Unexpected message: " + message);
                         }
-
-
                         break;
                     }
                 }
@@ -196,6 +189,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void fadeOutAndChangeImage(boolean isBlack) {
+        if (isBlack) {
+            ObjectAnimator.ofFloat(imageView, View.ALPHA, 1.0f, 0f).setDuration(1000).start();
+
+        } else {
+            ObjectAnimator.ofFloat(imageView, View.ALPHA, 0.1f, 1.0f).setDuration(1000).start();
+
+        }
+    }
+
     public String getDeviceIpAddress(Context context) {
         // Get the WifiManager system service
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -210,6 +213,17 @@ public class MainActivity extends AppCompatActivity {
         String formattedIpAddress = Formatter.formatIpAddress(ipAddress);
 
         return formattedIpAddress;
+    }
+
+    private String getIpLastTwoGigits() {
+        String lastTwo = "";
+
+        if (ipAddress.length() >= 2) {
+            lastTwo = ipAddress.substring(ipAddress.length() - 2);
+        } else {
+            Toast.makeText(this, "Failed to get ip address image.", Toast.LENGTH_LONG).show();
+        }
+        return lastTwo;
     }
 
     /**
