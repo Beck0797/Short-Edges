@@ -79,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("ImageTest", "Image downloaded successfully!");
 
                 } else {
-                    Toast.makeText(this, "Failed to download image.\n" +
-                            " Check Server: " + FileServerApi.BASE_URL, Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to download image.\n" +
+                            " Check Server: " + FileServerApi.BASE_URL, Toast.LENGTH_SHORT).show());
                 }
             });
         }

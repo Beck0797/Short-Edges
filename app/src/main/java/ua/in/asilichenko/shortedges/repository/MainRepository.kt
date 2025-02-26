@@ -28,10 +28,10 @@ class MainRepository @Inject constructor(
     private val preferenceManager: PreferenceManager
 ) {
     suspend fun fetchAndSaveImage(imageId: Int): Boolean {
-        val response = fileServerApi.getImage(imageId)
-        val imageConverter: ImageToStringConverter = ImageToStringConverter()
 
         return try {
+            val response = fileServerApi.getImage(imageId)
+            val imageConverter: ImageToStringConverter = ImageToStringConverter()
             if (response.isSuccessful && response.body() != null) {
                 val inputStream = response.body()?.byteStream()
                 val bitmap = BitmapFactory.decodeStream(inputStream)
