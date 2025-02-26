@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private MainViewModel viewModel;
     private String ipAddress;
     private String ipLastTwoDigits;
+    private boolean isCurrentlyBlack;
     @Inject
     PreferenceManager preferenceManager;
 
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         ipAddress = getDeviceIpAddress(this);
         ipLastTwoDigits = getIpLastTwoGigits();
         preferenceManager.init(this);
+        isCurrentlyBlack = false;
 
         getScreenSize();
         setDecorFitsSystemWindows();
@@ -129,9 +131,15 @@ public class MainActivity extends AppCompatActivity {
 
                     case "SM": {
                         if (message.endsWith("00")) {
-                            fadeOutAndChangeImage(true);
+                            if (!isCurrentlyBlack) {
+                                isCurrentlyBlack = true;
+                                fadeOutAndChangeImage(true);
+                            }
                         } else if (message.endsWith("01")) {
-                            fadeOutAndChangeImage(false);
+                            if (isCurrentlyBlack) {
+                                isCurrentlyBlack = false;
+                                fadeOutAndChangeImage(false);
+                            }
                         } else {
                             Log.e("ImageTest", "Unexpected message: " + message);
                         }
