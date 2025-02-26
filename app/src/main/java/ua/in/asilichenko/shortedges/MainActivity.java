@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         getScreenSize();
         setDecorFitsSystemWindows();
         viewModel.startUdpClient();
+        setBrightnessMax();
 
         if (doImageExist()) {
 
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to download image.\n" +
-                            " Check Server: " + FileServerApi.BASE_URL, Toast.LENGTH_SHORT).show());
+                            " Check Server: " + FileServerApi.BASE_URL, Toast.LENGTH_LONG).show());
                 }
             });
         }
@@ -142,6 +143,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.top_btn), this::onApplyWindowInsets);
+    }
+
+    private void setBrightnessMax() {
+//        try {
+            WindowManager.LayoutParams layout = getWindow().getAttributes();
+            layout.screenBrightness = 1F;
+            getWindow().setAttributes(layout);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     public boolean doImageExist() {
