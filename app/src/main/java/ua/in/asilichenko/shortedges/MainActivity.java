@@ -202,10 +202,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void fadeOutAndChangeImage(boolean isBlack) {
         if (isBlack) {
-            ObjectAnimator.ofFloat(imageView, View.ALPHA, 1.0f, 0f).setDuration(1000).start();
+            ObjectAnimator.ofFloat(imageView, View.ALPHA, 1.0f, 0f).setDuration(200).start();
 
         } else {
-            ObjectAnimator.ofFloat(imageView, View.ALPHA, 0.1f, 1.0f).setDuration(1000).start();
+            ObjectAnimator.ofFloat(imageView, View.ALPHA, 0.1f, 1.0f).setDuration(200).start();
 
         }
     }
