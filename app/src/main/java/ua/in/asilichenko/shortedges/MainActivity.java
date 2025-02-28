@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         getScreenSize();
         setDecorFitsSystemWindows();
         viewModel.startUdpClient();
-        setBrightnessMax();
+//        setBrightnessMax();
 
         if (doImageExist()) {
 
